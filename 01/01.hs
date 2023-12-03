@@ -46,7 +46,7 @@ isSpelledNum string = string `elem` map fst spelled_nums
 getSpelledNumTuple :: String -> (String, String)
 getSpelledNumTuple string
     | isSpelledNum string = getSpelledNum' string
-    | length string == 1 = (string, "")
+    | length string == 1 = (string, "_")
     | otherwise = getSpelledNumTuple (map (string!!) [0..(length string - 2)])
     where
         min_num_length' = 3
@@ -61,11 +61,10 @@ spellOutLine line pos
         let leftPart  = if pos == 0 then "" else (map (line!!) [0..(pos - 1)])
         let rightPart = (map (line!!) [pos..(length line - 1)])
         let spelledNumTuple = getSpelledNumTuple rightPart
-        let spelledNumReplacedLength = length (fst spelledNumTuple)
-        let spelledNumReplacementLength = length (snd spelledNumTuple)
-        let rightPartTrunc = map (rightPart!!) [spelledNumReplacedLength..(length rightPart - 1)]
-        let lineNew = leftPart ++  (snd spelledNumTuple) ++ rightPartTrunc
-        let posNew = pos + spelledNumReplacementLength
+        -- let spelledNumReplacementLength = length (snd spelledNumTuple) -- 1
+        let rightPartTrunc = map (rightPart!!) [1..(length rightPart - 1)]
+        let lineNew = leftPart ++ (snd spelledNumTuple) ++ rightPartTrunc
+        let posNew = pos + 1
         spellOutLine lineNew posNew
 
 solvePartOne :: [String] -> Int
