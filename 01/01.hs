@@ -28,10 +28,55 @@ nums_sum xs = nums_sum' xs
         nums_sum' [] = 0
         nums_sum' (x:xs) = x + nums_sum' xs
 
+spelled_nums = [
+    ("one",   "1"),
+    ("two",   "2"),
+    ("three", "3"),
+    ("four",  "4"),
+    ("five",  "5"),
+    ("six",   "6"),
+    ("seven", "7"),
+    ("eight", "8"),
+    ("nine",  "9")
+    ] ++ (zip (map show [1..9]) (map show [1..9]))
+
+isSpelledNum :: String -> Bool
+isSpelledNum string = string `elem` map fst spelled_nums
+
+getSpelledNumTuple :: String -> (String, String)
+getSpelledNumTuple string
+    | isSpelledNum string = getSpelledNum' string
+    | length string == 1 = (string, "")
+    | otherwise = getSpelledNumTuple (map (string!!) [0..(length string - 2)])
+    where
+        min_num_length' = 3
+        getSpelledNum' :: String -> (String, String)
+        getSpelledNum' string = (filter (\x -> fst x == string) spelled_nums)!!0
+
+-- quadratic time, could be better
+spellOutLine :: String -> Int -> String
+spellOutLine line pos
+    | pos == length line = line
+    | otherwise = do
+        let leftPart  = if pos == 0 then "" else (map (line!!) [0..(pos - 1)])
+        let rightPart = (map (line!!) [pos..(length line - 1)])
+        let spelledNumTuple = getSpelledNumTuple rightPart
+        let spelledNumReplacedLength = length (fst spelledNumTuple)
+        let spelledNumReplacementLength = length (snd spelledNumTuple)
+        let rightPartTrunc = map (rightPart!!) [spelledNumReplacedLength..(length rightPart - 1)]
+        let lineNew = leftPart ++  (snd spelledNumTuple) ++ rightPartTrunc
+        let posNew = pos + spelledNumReplacementLength
+        spellOutLine lineNew posNew
+
+solvePartOne :: [String] -> Int
+solvePartOne lines = nums_sum $ map linenum lines
+
+solvePartTwo :: [String] -> Int
+solvePartTwo lines = nums_sum $ map linenum $ map (\x -> spellOutLine x 0) lines
+
 main :: IO ()
 main = do
-    file_contents <- readFile "input.txt"
+    file_contents <- readFile "01/input.txt"
     let file_lines = lines file_contents
-    let nums = map linenum file_lines
-    let final_sum = nums_sum nums
-    print final_sum
+    print $ solvePartOne file_lines
+    print $ solvePartTwo file_lines
