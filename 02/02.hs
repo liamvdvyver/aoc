@@ -69,7 +69,9 @@ all_true :: [Bool] -> Bool
 all_true bools = foldl (&&) True bools
 
 countFromColour :: [(Int, String)] -> String -> Int
-countFromColour totals colour = fst ((filter (\x -> snd x == colour) totals)!!0)
+countFromColour totals colour
+    | colour `elem` (map snd totals) = fst ((filter (\x -> snd x == colour) totals)!!0)
+    | otherwise = 0
 
 arePossibleCounts :: [(Int, String)] -> [(Int, String)] -> Bool
 arePossibleCounts counts totals = do
@@ -85,6 +87,23 @@ solvePartOne lines totals = do
     let possibleInds = map fst possibleGames
     foldl (+) 0 possibleInds
 
+getMaxCubes :: [[(Int, String)]] -> String -> Int
+getMaxCubes counts colour = do
+    let allCounts = map (\x -> countFromColour x colour) counts
+    foldl max 0 allCounts
+
+getGamePower :: [[(Int, String)]] -> Int
+getGamePower counts =
+    getMaxCubes counts "red" *
+    getMaxCubes counts "green" *
+    getMaxCubes counts "blue"
+
+solvePartTwo :: [String] -> Int
+solvePartTwo lines = do
+    let parsedGames = map (\x -> parseLine (splitLine x)) lines
+    let gamePowers = map (\x -> getGamePower (snd x)) parsedGames
+    foldl (+) 0 gamePowers
+
 totals = [(12, "red"), (13, "green"), (14, "blue")]
 
 main :: IO ()
@@ -92,3 +111,4 @@ main = do
     file_contents <- readFile "02/input.txt"
     let file_lines = lines file_contents
     print $ solvePartOne file_lines totals
+    print $ solvePartTwo file_lines
