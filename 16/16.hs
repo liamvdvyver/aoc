@@ -78,15 +78,26 @@ rayTrace layout cur hist memo = do
                     return $ Set.unions $ nextPaths
 
 
-solvePartOne :: [String] -> IO Int
-solvePartOne layout = do
+solvePartOne :: [String] -> ((Int, Int), (Int, Int)) -> IO Int
+solvePartOne layout start = do
     memo <- H.new
-    paths <- rayTrace layout ((0, 0), (1, 0)) Set.empty memo
+    paths <- rayTrace layout start Set.empty memo
     return $ Set.size paths
 
 
+solvePartTwo :: [String] -> IO Int
+solvePartTwo layout = do
+    let starts = [ ((x, 0),                 (1,  0)) | x <- [0..((length . head) layout - 1)] ] ++
+                 [ ((x, length layout - 1), (-1, 0)) | x <- [0..((length . head) layout - 1)] ] ++
+                 [ ((0,                 y), (1,  0)) | y <- [0..(length layout - 1)] ] ++
+                 [ ((length layout - 1, y), (-1, 0)) | y <- [0..(length layout - 1)] ]
+    rets <- mapM (solvePartOne layout) starts
+    return $ maximum rets
+
 main = do
-    contents <- readFile "16/input.txt"
+    contents <- readFile "16/input_partial.txt"
     let fileLines = lines contents
-    solution <- solvePartOne fileLines
-    print solution
+    solutionOne <- solvePartOne fileLines ((0, 0), (1, 0))
+    print solutionOne
+    solutionTwo <- solvePartTwo fileLines
+    print solutionTwo
