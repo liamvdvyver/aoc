@@ -100,4 +100,4 @@ main = do
     solutionOne <- solvePartOne fileLines ((0, 0), (1, 0))
     print solutionOne
     solutionTwo <- solvePartTwo fileLines
-    print solutionTwo
+ 

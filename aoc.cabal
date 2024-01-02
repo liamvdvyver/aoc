@@ -1,0 +1,85 @@
+cabal-version:      2.4
+name:               aoc
+version:            0.1.0.0
+
+author:             Liam van der Vyver
+maintainer:         91105007+liamvdvyver@users.noreply.github.com
+
+extra-source-files:
+    README.md
+
+common shared-properties
+    hs-source-dirs:   solutions
+    build-depends:    base, containers
+    default-language: Haskell2010
+
+library SplitOn
+    import:           shared-properties
+    exposed-modules:  SplitOn
+    hs-source-dirs:   solutions/libSplit
+
+executable 01
+    import:           shared-properties
+    main-is:          01.hs
+
+executable 02
+    import:           shared-properties
+    main-is:          02.hs
+
+executable 03
+    import:           shared-properties
+    main-is:          03.hs
+
+executable 04
+    import:           shared-properties
+    main-is:          04.hs
+
+executable 05
+    import:           shared-properties
+    main-is:          05.hs
+    build-depends:    SplitOn
+
+executable 06
+    import:           shared-properties
+    main-is:          06.hs
+
+executable 07
+    import:           shared-properties
+    main-is:          07.hs
+
+executable 08
+    import:           shared-properties
+    main-is:          08.hs
+
+executable 09
+    import:           shared-properties
+    main-is:          09.hs
+
+executable 10
+    import:           shared-properties
+    main-is:          10.hs
+
+executable 11
+    import:           shared-properties
+    main-is:          11.hs
+
+executable 12
+    import:           shared-properties
+    main-is:          12.hs
+
+executable 13
+    import:           shared-properties
+    main-is:          13.hs
+
+executable 14
+    import:           shared-properties
+    main-is:          14.hs
+
+executable 15
+    import:           shared-properties
+    main-is:          15.hs
+
+executable 16
+    import:           shared-properties
+    main-is:          16.hs
+    build-depends:    base, containers, parallel, hashtables

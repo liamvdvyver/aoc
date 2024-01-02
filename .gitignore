@@ -1,2 +1,3 @@
-*/input.txt
-*/input_partial.txt
+inputs/*.txt
+dist-newstyle
+dist-newstyle/*

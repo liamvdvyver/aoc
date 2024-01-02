@@ -125,7 +125,7 @@ solvePartTwo lines = do
 
 main :: IO ()
 main = do
-    file_contents <- readFile "03/input.txt"
+    file_contents <- readFile "inputs/03.txt"
     let file_lines = lines file_contents
     print $ solvePartOne file_lines
     print $ solvePartTwo file_lines

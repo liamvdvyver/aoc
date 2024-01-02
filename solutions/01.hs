@@ -74,7 +74,7 @@ solvePartTwo lines = numsSum $ map lineNum $ map (\x -> spellOutLine x 0) lines
 
 main :: IO ()
 main = do
-    file_contents <- readFile "01/input.txt"
+    file_contents <- readFile "inputs/01.txt"
     let file_lines = lines file_contents
     print $ solvePartOne file_lines
     print $ solvePartTwo file_lines

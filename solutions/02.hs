@@ -108,7 +108,7 @@ totals = [(12, "red"), (13, "green"), (14, "blue")]
 
 main :: IO ()
 main = do
-    file_contents <- readFile "02/input.txt"
+    file_contents <- readFile "inputs/02.txt"
     let file_lines = lines file_contents
     print $ solvePartOne file_lines totals
     print $ solvePartTwo file_lines

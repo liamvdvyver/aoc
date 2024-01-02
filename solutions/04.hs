@@ -70,7 +70,7 @@ solvePartTwo lines = foldl (+) 0 $ map fst (winCopies $ initCardQ $ map parseLn 
 
 main :: IO ()
 main = do
-    file_contents <- readFile "04/input.txt"
+    file_contents <- readFile "inputs/04.txt"
     let file_lines = lines file_contents
     print $ solvePartOne file_lines
     print $ solvePartTwo file_lines
