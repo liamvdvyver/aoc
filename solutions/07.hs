@@ -90,7 +90,7 @@ solvePart part lines = sum $ map (\(bid, rank) -> bid * rank) bidRanks
 
 
 main = do
-    contents <- readFile "07/input_partial.txt"
+    contents <- readFile "inputs/07.txt"
     let input = lines contents
     print $ solvePart 1 $ input
     print $ solvePart 2 $ input

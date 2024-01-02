@@ -41,7 +41,7 @@ solvePartTwo lines = product $ map (\(lb, ub) -> ub - lb + 1) bounds
         bounds = map findBounds races
 
 main = do
-    file_contents <- readFile "06/input.txt"
+    file_contents <- readFile "inputs/06.txt"
     let file_lines = lines file_contents
     print $ parse file_lines
     print $ unkern $ parse file_lines

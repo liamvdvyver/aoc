@@ -121,7 +121,7 @@ solvePartTwo lines = lcm' pathLengths
 
 main :: IO ()
 main = do
-    contents <- readFile "08/input.txt"
+    contents <- readFile "inputs/08.txt"
     let file_lines = lines contents
     print $ parseLns file_lines
     print $ solvePartOne file_lines

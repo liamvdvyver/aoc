@@ -72,6 +72,6 @@ solvePartTwo str = sum $ map sum $ filter (not . null) $ map getFocusingPowers f
 
 
 main = do
-    contents <- readFile "15/input.txt"
+    contents <- readFile "inputs/15.txt"
     print $ solvePartOne contents
     print $ solvePartTwo contents

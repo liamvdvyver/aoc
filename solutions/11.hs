@@ -54,7 +54,7 @@ solvePartTwo spaceMap = sum $ map (getDistance emptyRowsCols 1000000) galaxyPair
 
 
 main = do
-    contents <- readFile "11/input.txt"
+    contents <- readFile "inputs/11.txt"
     let file_lines = lines contents
     print $ solvePartOne file_lines
     print $ solvePartTwo file_lines

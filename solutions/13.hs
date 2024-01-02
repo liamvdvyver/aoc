@@ -68,7 +68,7 @@ solvePartTwo input = sum $ map scorePattern' $ parseLns input []
 
 
 main = do
-    contents <- readFile "13/input.txt"
+    contents <- readFile "inputs/13.txt"
     let file_lines = lines contents
     print $ solvePartOne file_lines
     print $ solvePartTwo file_lines

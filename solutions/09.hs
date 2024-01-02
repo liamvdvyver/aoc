@@ -40,7 +40,7 @@ solvePartTwo :: [String] -> Integer
 solvePartTwo lines = sum $ map (\x -> head $ head $ predictPrev $ genDiffPyramid [x]) $ parseLns lines
 
 main = do
-    contents <- readFile "09/input.txt"
+    contents <- readFile "inputs/09.txt"
     let file_lines = lines contents
     print file_lines
     print $ solvePartOne file_lines

@@ -90,6 +90,6 @@ solveLine (str, nums) = length upToEnd
 -- }}}
 
 main = do
-    contents <- readFile "12/input.txt"
+    contents <- readFile "inputs/12.txt"
     let file_lines = lines contents
     print $ solvePartOne file_lines

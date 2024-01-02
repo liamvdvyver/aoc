@@ -129,7 +129,7 @@ solvePartTwo sketch = numInside replacedSketch pipes queue 0 False 0
 
 
 main = do
-    contents <- readFile "10/input.txt"
+    contents <- readFile "inputs/10.txt"
     let file_lines = lines contents
-    -- print $ solvePartOne file_lines
+    print $ solvePartOne file_lines
     print $ solvePartTwo file_lines

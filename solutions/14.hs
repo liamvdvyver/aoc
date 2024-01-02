@@ -58,7 +58,7 @@ solvePartTwo lns = sum $ map getLoad $ nSpins 1000000000 0 [tLines] tLines
         tLines = transpose lns
 
 main = do
-    contents <- readFile "14/input.txt"
+    contents <- readFile "inputs/14.txt"
     let file_lines = lines contents
     print $ solvePartOne file_lines
     print $ solvePartTwo file_lines
