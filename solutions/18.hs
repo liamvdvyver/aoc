@@ -1,9 +1,11 @@
 module Main where
 
+import Data.List
 import qualified Data.Map as Map
 import Data.Maybe
 import qualified Data.Set as Set
 import Text.Read
+import qualified Data.Foldable as Set
 
 dirMap :: Map.Map Char (Int, Int)
 dirMap =
@@ -42,32 +44,70 @@ plotBoundary (((dir, dist), hex) : xs) ret = plotBoundary (((dir, dist - 1), hex
     newNode = ((lastX + xOffset, lastY + yOffset), hex)
     retNew = newNode : ret
 
+{- | Test plotCorners
+
+>>> plotCorners [(('D', 2), "c") ] [((0, 1), "b"), ((0, 0), "a")]
+[((0,3),"c"),((0,1),"b"),((0,0),"a")]
+-}
+plotCorners :: [((Char, Int), String)] -> [((Int, Int), String)] -> [((Int, Int), String)]
+plotCorners [] ret = ret
+plotCorners (((dir, dist), hex) : xs) ret = plotCorners xs retNew
+  where
+    (((lastX, lastY), _) : _) = ret
+    (xOffset, yOffset) = fromMaybe (0, 0) $ Map.lookup dir dirMap
+    newNode = ((lastX + xOffset * dist, lastY + yOffset * dist), hex)
+    retNew = newNode : ret
+
+{- | Test isBoundary
+
+>>> isBoundary [((0, 0), ""), ((0, 3), "")] (0, 2)
+True
+>>> isBoundary [((0, 0), ""), ((0, 3), "")] (0, 4)
+False
+>>> isBoundary [((0, 0), ""), ((0, 3), "")] (1, 2)
+False
+>>> isBoundary [((0, 0), ""), ((0, 3), "")] (1, 4)
+False
+-}
+
+-- For working with just the corners, can compare pairwise
+isBoundary :: [((Int, Int), String)] -> (Int, Int) -> Bool
+isBoundary [] (x, y) = False
+isBoundary [a] (x, y) = False
+isBoundary (((x1, y1), col1) : ((x2, y2), col2) : xs) (x, y)
+    | xInside && yInside = True
+    | otherwise = isBoundary (((x2, y2), col2) : xs) (x, y)
+  where
+    xInside = (x - x1) * (x - x2) <= 0
+    yInside = (y - y1) * (y - y2) <= 0
+
 -- Flood fill
 -- Can memoise later
-interiors ::
-    [(Int, Int)] ->
+exteriors ::
+    [((Int, Int), String)] ->
     ((Int, Int), (Int, Int)) ->
-    [(Int, Int)] ->
+    Set.Set (Int, Int) ->
     (Int, Int) ->
     Set.Set (Int, Int)
-interiors boundaries bounds hist (x, y)
-    | terminate = Set.fromList hist
-    | otherwise = Set.unions $ map (interiors boundaries bounds ((x, y) : hist)) nexts
-  where
-    nexts =
-        [ (x + 1, y)
-        , (x - 1, y)
-        , (x, y + 1)
-        , (x, y - 1)
-        ]
-    ((xMin, xMax), (yMin, yMax)) = bounds
-    terminate =
-        x < xMin
-            || y < yMin
-            || x > xMax
-            || y > yMax
-            || (x, y) `elem` hist
-            || (x, y) `elem` boundaries
+exteriors corners bounds ret (x, y)
+    | terminate = ret
+    | otherwise = Set.unions $ map (exteriors corners bounds newRet) nexts
+      where
+        nexts =
+            [ (x + 1, y)
+            , (x - 1, y)
+            , (x, y + 1)
+            , (x, y - 1)
+            ]
+        ((xMin, xMax), (yMin, yMax)) = bounds
+        terminate =
+            x < xMin
+                || y < yMin
+                || x > xMax
+                || y > yMax
+                || (x, y) `Set.elem` ret
+                || isBoundary corners (x, y)
+        newRet = Set.insert (x, y) ret
 
 {- | Test part one
 
@@ -79,19 +119,31 @@ interiors boundaries bounds hist (x, y)
 solvePartOne :: [String] -> Int
 solvePartOne lns = totalSize - exteriorSize
   where
-    boundaries = map fst $ plotBoundary parsedLns [((0, 0), "")]
+    corners = plotCorners parsedLns [((0, 0), "")]
     parsedLns = map parseLn lns
     bounds = ((xMin, xMax), (yMin, yMax))
-    xMax = maximum $ map fst boundaries
-    xMin = minimum $ map fst boundaries
-    yMax = maximum $ map snd boundaries
-    yMin = minimum $ map snd boundaries
+    xMax = maximum $ map (fst . fst) corners
+    xMin = minimum $ map (fst . fst) corners
+    yMax = maximum $ map (snd . fst) corners
+    yMin = minimum $ map (snd . fst) corners
     totalSize = (1 + xMax - xMin) * (1 + yMax - yMin)
-    edges =
-        Set.fromList $
-            [(x, y) | y <- [yMin .. yMax], x <- [xMin, xMax]] ++ [(x, y) | y <- [yMin, yMax], x <- [xMin .. xMax]]
-    exteriorSize = Set.size $ Set.unions $ Set.map (interiors boundaries bounds []) edges
+    edges = [(x, y) | y <- [yMin .. yMax], x <- [xMin, xMax]] ++ [(x, y) | y <- [yMin, yMax], x <- [xMin .. xMax]]
+    exteriorSize = Set.size $ checkEdges corners bounds Set.empty edges
+
+-- Redundant edge starting points can be reached by another starting point, so
+-- we can just check whether a starting point is marked as exterior to prune
+checkEdges ::
+    [((Int, Int), String)] ->
+    ((Int, Int), (Int, Int)) ->
+    Set.Set (Int, Int) ->
+    [(Int, Int)] ->
+    Set.Set (Int, Int)
+checkEdges corners bounds ret [] = ret
+checkEdges corners bounds ret ((x, y) : xs) = checkEdges corners bounds newRet xs
+  where
+    newRet = Set.union fromCur ret
+    fromCur = exteriors corners bounds ret (x, y)
 
 main = do
-    input <- readFile "inputs/18.txt"
-    print $ solvePartOne $ lines input
+    contents <- readFile "inputs/18.txt"
+    print $ solvePartOne $ lines contents -- IDK why this shit so slow
