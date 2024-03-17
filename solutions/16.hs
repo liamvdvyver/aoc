@@ -10,7 +10,9 @@ import qualified Data.HashTable.IO as H
 
 type HashTable k v = H.BasicHashTable k v
 
-movement :: Map.Map (Char, (Int, Int)) [(Int, Int)]
+-- Maps (character, offset) to list of offset
+-- I.e. current direction to directions for next move
+movement :: Map.Map (Char, Velocity) [Velocity]
 movement =
     Map.fromList
         [ (('.', (1, 0)), [(1, 0)])
@@ -35,49 +37,73 @@ movement =
         , (('-', (0, -1)), [(-1, 0), (1, 0)])
         ]
 
+type Layout = [String]
+type Pos = (Int, Int)
+type Velocity = (Int, Int)
+type State = (Pos, Velocity)
+type History = [State] -- Newest to oldest
+type Positions = Set.Set Pos
+
+lookupTile :: Layout -> Pos -> Char
+lookupTile layout (x, y) = layout !! y !! x
+
+inBounds :: Layout -> Pos -> Bool
+inBounds layout (x, y)
+    | x < 0 = False
+    | y < 0 = False
+    | x >= length (head layout) = False
+    | y >= length layout = False
+    | otherwise = True
+
+getChildren :: Layout -> State -> [State]
+getChildren layout (pos@(x, y), v@(vx, vy)) = validChildren
+  where
+    nextVs = fromJust $ Map.lookup (lookupTile layout pos, v) movement
+    allChildren = map (\(dx, dy) -> ((x + dx, y + dy), (dx, dy))) nextVs
+    validChildren = filter (inBounds layout . fst) allChildren
+
 rayTrace ::
-    [String] -> -- The layout
-    ((Int, Int), (Int, Int)) -> -- The current pos and velocity
-    Set.Set ((Int, Int), (Int, Int)) -> -- All history of pos and v
-    HashTable ((Int, Int), (Int, Int)) (Set.Set (Int, Int)) -> -- Mutable: returned values
-    IO (Set.Set (Int, Int)) -- All tiles eventually reached
-rayTrace layout cur hist memo = do
-    lookupVal <- H.lookup memo cur
+    Layout ->
+    State ->
+    History ->
+    HashTable State Positions ->
+    IO (Set.Set Pos)
+rayTrace layout state@(pos@(x, y), velo@(vx, vy)) history memo = do
+    memoised <- H.lookup memo state
+    case memoised of
+        Just a -> do
+            return a
+        Nothing -> do
+            let tileChar = lookupTile layout pos
+            -- let visited = state `elem` history
+            let children = getChildren layout state
 
-    let ((x, y), (vX, vY)) = cur
-    let shouldExit = cur `Set.member` hist || x < 0 || y < 0 || y >= length layout || x >= length (head layout)
-    let curRet = Set.fromList $ map fst $ Set.toList hist
-    let curChar = layout !! y !! x
-
-    let nextOffsets = fromJust $ Map.lookup (curChar, (vX, vY)) movement
-
-    let rayTraceNext (nextVX, nextVY) = rayTrace layout newCur newHist memo
-          where
-            newCur = ((x + nextVX, y + nextVY), (nextVX, nextVY))
-            newHist = Set.insert cur hist
-
-    ( if isJust lookupVal
-            then return $ Set.union (fromJust lookupVal) curRet
-            else
-                ( if shouldExit
-                    then
-                        ( do
-                            H.insert memo cur curRet
-                            return curRet
-                        )
-                    else
-                        ( do
-                            nextPaths <- mapM rayTraceNext nextOffsets
-                            return $ Set.unions $ nextPaths
-                        )
-                )
-        )
-
-solvePartOne :: [String] -> ((Int, Int), (Int, Int)) -> IO Int
-solvePartOne layout start = do
-    memo <- H.new
-    paths <- rayTrace layout start Set.empty memo
-    return $ Set.size paths
+            case children of
+                -- No further children, i.e. terminal node
+                [] -> do
+                    let ret = Set.singleton pos
+                    H.insert memo state ret
+                    return ret
+                -- Have children to explore
+                _ -> do
+                    let historyLoop = break ((== pos) . fst) history
+                    case historyLoop of
+                        -- No loop, just see where each child goes
+                        (_, []) -> do
+                            childReturns <- mapM (\s -> rayTrace layout s (state : history) memo) children
+                            let ret = foldl Set.union (Set.singleton pos) childReturns
+                            H.insert memo state ret
+                            return ret
+                        -- If we have looped to get here
+                        (loop, _) -> do
+                            -- Children who we have visited in the loop, we know where they lead
+                            -- Otherwise, we must still explore them
+                            let loopyChild = last loop
+                            let unexploredChildren = filter (\child -> fst child /= fst loopyChild) children
+                            unexploredChildReturns <- mapM (\s -> rayTrace layout s (state : history) memo) unexploredChildren
+                            let ret = foldl Set.union (Set.fromList $ pos : map fst loop) unexploredChildReturns
+                            H.insert memo state ret
+                            return ret
 
 {- | Part one test input
 
@@ -87,15 +113,21 @@ solvePartOne layout start = do
 >>> print solutionOne
 46
 -}
-solvePartTwo :: [String] -> IO Int
-solvePartTwo layout = do
-    let starts =
-            [((x, 0), (0, 1)) | x <- [0 .. ((length . head) layout - 1)]]
-                ++ [((x, length layout - 1), (0, -1)) | x <- [0 .. ((length . head) layout - 1)]]
-                ++ [((0, y), (1, 0)) | y <- [0 .. (length layout - 1)]]
-                ++ [((length layout - 1, y), (-1, 0)) | y <- [0 .. (length layout - 1)]]
-    rets <- mapM (solvePartOne layout) starts
-    return $ maximum rets
+solvePartOne' ::
+    [String] ->
+    ((Int, Int), (Int, Int)) ->
+    HashTable ((Int, Int), (Int, Int)) (Set.Set (Int, Int)) ->
+    IO Int
+solvePartOne' layout start memo = do
+    -- Given a memo
+    paths <- rayTrace layout start [] memo
+    return $ Set.size paths
+
+-- Initialise the memo and pass to helper
+solvePartOne :: [String] -> ((Int, Int), (Int, Int)) -> IO Int
+solvePartOne layout start = do
+    memo <- H.new
+    solvePartOne' layout start memo
 
 {- | Part two argmax yields correct value
 
@@ -106,6 +138,29 @@ solvePartTwo layout = do
 51
 -}
 
+{- | Ensure memo works correctly
+
+>>> contents <- readFile "inputs/16.txt"
+>>> let fileLines = lines contents
+>>> bigExample <- solvePartTwo' fileLines [((98,0),(0,1))]
+>>> print bigExample
+8174
+>>> bigExample' <- solvePartTwo' fileLines [((0,0),(0,1)),((98,0),(0,1))]
+>>> print bigExample'
+8174
+
+-}
+solvePartTwo' :: [String] -> [State] -> IO Int
+solvePartTwo' layout starts = do
+    -- Fully memoised approach, doesn't work
+    -- memo <- H.new
+    -- rets <- mapM (\x -> solvePartOne' layout x memo) starts
+
+    -- Don't share global memo
+    rets <- mapM (solvePartOne layout) starts
+
+    return $ maximum rets
+
 {- | Part two test input
 
 >>> contents <- readFile "inputs/16p.txt"
@@ -114,10 +169,22 @@ solvePartTwo layout = do
 >>> print solutionTwo
 51
 -}
+solvePartTwo ::
+    [String] ->
+    IO Int
+solvePartTwo layout = do
+    let (xMax, yMax) = (length (head layout) - 1, length layout - 1)
+    let starts = [((x, 0), (0, 1)) | x <- [0 .. xMax]]
+            ++ [((x, yMax), (0, -1)) | x <- [0 .. xMax]]
+            ++ [((0, y), (1, 0)) | y <- [0 .. yMax]]
+            ++ [((xMax, y), (-1, 0)) | y <- [0 .. yMax]]
+    solvePartTwo' layout starts
+
 main = do
     contents <- readFile "inputs/16.txt"
     let fileLines = lines contents
     solutionOne <- solvePartOne fileLines ((0, 0), (1, 0))
     print solutionOne
+
     solutionTwo <- solvePartTwo fileLines
     print solutionTwo
