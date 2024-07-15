@@ -125,6 +125,7 @@ solvePartTwo lines = lowestLocation maps seedsRaw
 
 --- }}}
 
+main :: IO ()
 main = do
     file_contents <- readFile "inputs/05.txt"
     let file_lines = lines file_contents

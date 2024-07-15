@@ -6,6 +6,14 @@ import Data.Maybe
 import qualified Data.Set as Set
 import Text.Read
 import qualified Data.Foldable as Set
+import qualified Data.HashTable.IO as H
+
+-- Approach
+--
+-- Flood fill the outside, since we don't know where the interior is (are we
+-- moving CW/CCW)
+
+type HashTable k v = H.BasicHashTable k v
 
 dirMap :: Map.Map Char (Int, Int)
 dirMap =
@@ -132,6 +140,8 @@ solvePartOne lns = totalSize - exteriorSize
 
 -- Redundant edge starting points can be reached by another starting point, so
 -- we can just check whether a starting point is marked as exterior to prune
+-- We can create the memo within the initial call to exteriors
+-- And this way we don't duplicate any checks in a connected subgraph
 checkEdges ::
     [((Int, Int), String)] ->
     ((Int, Int), (Int, Int)) ->
@@ -139,7 +149,9 @@ checkEdges ::
     [(Int, Int)] ->
     Set.Set (Int, Int)
 checkEdges corners bounds ret [] = ret
-checkEdges corners bounds ret ((x, y) : xs) = checkEdges corners bounds newRet xs
+checkEdges corners bounds ret ((x, y) : xs)
+    | (x, y) `Set.elem` ret = checkEdges corners bounds ret xs
+    | otherwise = checkEdges corners bounds newRet xs
   where
     newRet = Set.union fromCur ret
     fromCur = exteriors corners bounds ret (x, y)

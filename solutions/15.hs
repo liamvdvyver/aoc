@@ -70,6 +70,10 @@ solvePartTwo str = sum $ map sum $ filter (not . null) $ map getFocusingPowers f
         instructions = hashAll [] Map.empty $ map parseInstruction $ parseLn str []
         finalBoxMap = followInstructions initBoxMap instructions
 
+-- | Test part one test case
+--
+-- >> 1 + 4
+-- 5
 
 main = do
     contents <- readFile "inputs/15.txt"

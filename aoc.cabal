@@ -107,6 +107,18 @@ executable 15
 
 executable 16
     hs-source-dirs:   solutions
-    build-depends:    base, containers, parallel, hashtables
+    build-depends:    base, containers, parallel, hashtables, doctest
     default-language: Haskell2010
     main-is:          16.hs
+
+executable 17
+    hs-source-dirs:   solutions
+    build-depends:    base, containers, PSQueue
+    default-language: Haskell2010
+    main-is:          17.hs
+
+executable 18
+    hs-source-dirs:   solutions
+    build-depends:    base, doctest, containers, hashtables, state
+    default-language: Haskell2010
+    main-is:          18.hs
