@@ -1,3 +1,4 @@
 inputs/*.txt
 dist-newstyle
 dist-newstyle/*
+problems/*
