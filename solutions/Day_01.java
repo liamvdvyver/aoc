@@ -1,10 +1,12 @@
+import java.util.Arrays;
 import java.util.Scanner;
 
 public class Day_01 {
 
     public static void main(String[] args) {
 
-        long maxCount = 0, curCount = 0;
+        // 1st value is current count
+        long[] maxs = {0, 0, 0, 0};
 
         Scanner in = new Scanner(System.in);
 
@@ -14,19 +16,19 @@ public class Day_01 {
 
             if (ln == "") {
 
-                maxCount = Math.max(curCount, maxCount);
-                curCount = 0;
+                Arrays.sort(maxs);
+                maxs[0] = 0;
 
             } else {
-                curCount += Integer.parseInt(ln);
+                maxs[0] += Integer.parseInt(ln);
             };
         };
 
-        maxCount = Math.max(curCount, maxCount);
+        Arrays.sort(maxs);
 
         in.close();
 
-        System.out.println(String.valueOf(maxCount));
-
+        long ans = Arrays.stream(maxs).skip(1).reduce(0, (x, y) -> x + y);
+        System.out.println(String.valueOf(ans));
     }
 }
