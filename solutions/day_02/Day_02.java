@@ -60,6 +60,7 @@ class Play {
 class Round {
     public Play opponent;
     public Play own;
+    public Outcome goal;
 
     public Round(Play opponent, Play own) {
         this.opponent = opponent;
@@ -91,11 +92,57 @@ class Round {
 
     public void parseGuideLine(String line) {
         String[] words = line.split(" ");
-        // System.out.println(String.valueOf(words[0]));
-        // System.out.println(String.valueOf(words[1]));
         this.opponent = new Play(words[0]);
         this.own = new Play(words[1]);
     };
+
+    // Part 2
+    private static HashMap<String, Outcome> outcomeMap = new HashMap<String, Outcome>();
+    static {
+        outcomeMap.put("X", Outcome.LOSS);
+        outcomeMap.put("Y", Outcome.DRAW);
+        outcomeMap.put("Z", Outcome.WIN);
+    };
+
+    public void parseGuideLine2(String line) {
+        String[] words = line.split(" ");
+        this.opponent = new Play(words[0]);
+        this.goal = outcomeMap.get(words[1]);
+    };
+
+    public static HashMap<Shape, Shape> winMap = new HashMap<Shape, Shape>();
+    static {
+        winMap.put(Shape.SCISSORS, Shape.ROCK);
+        winMap.put(Shape.ROCK, Shape.PAPER);
+        winMap.put(Shape.PAPER, Shape.SCISSORS);
+    };
+
+    public static HashMap<Shape, Shape> lossMap = new HashMap<Shape, Shape>();
+    static {
+        lossMap.put(Shape.SCISSORS, Shape.PAPER);
+        lossMap.put(Shape.ROCK, Shape.SCISSORS);
+        lossMap.put(Shape.PAPER, Shape.ROCK);
+    };
+
+    public static HashMap<Shape, Shape> drawMap = new HashMap<Shape, Shape>();
+    static {
+        lossMap.put(Shape.SCISSORS, Shape.SCISSORS);
+        lossMap.put(Shape.ROCK, Shape.ROCK);
+        lossMap.put(Shape.PAPER, Shape.PAPER);
+    };
+
+    private static HashMap<Outcome, HashMap<Shape, Shape>> moveMap = new HashMap<Outcome, HashMap<Shape, Shape>>();
+    {
+        moveMap.put(Outcome.LOSS, lossMap);
+        moveMap.put(Outcome.WIN, winMap);
+        moveMap.put(Outcome.DRAW, drawMap);
+    };
+
+    public int score2() {
+
+        this.own = moveMap.get(this.goal).get(this.opponent.shape);
+        return 0;
+    }
 }
 
 public class Day_02 {
@@ -103,6 +150,7 @@ public class Day_02 {
     public static void main(String[] args) {
 
         Integer score = 0;
+        Integer score2 = 0;
 
         Scanner in = new Scanner(System.in);
 
@@ -112,6 +160,10 @@ public class Day_02 {
 
             Round curRound = new Round();
             curRound.parseGuideLine(ln);
+            score += curRound.score();
+
+            Round curRound2 = new Round();
+            curRound2.parseGuideLine2(ln);
             score += curRound.score();
 
         };
