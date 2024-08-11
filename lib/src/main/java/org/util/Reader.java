@@ -1,4 +1,4 @@
-package org.day_02;
+package org.util;
 
 import java.io.BufferedReader;
 import java.io.FileReader;

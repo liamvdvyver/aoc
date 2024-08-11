@@ -1,6 +1,7 @@
 package org.day_02;
 
 import java.util.List;
+import org.util.Reader;
 
 public class SolveDay02 {
 
@@ -19,7 +20,7 @@ public class SolveDay02 {
     public static void main(String[] args) {
 
         String fullInput = "lib/src/main/resources/problems/day_02/02.txt";
-        List<String> input = org.day_02.Reader.read(fullInput);
+        List<String> input = Reader.read(fullInput);
 
         System.out.println("Part one:");
         System.out.println(solvePartOne(input));
