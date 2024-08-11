@@ -1,4 +1,17 @@
-inputs/*.txt
-dist-newstyle
-dist-newstyle/*
-problems/*
+lib/src/main/resources/problems/
+
+# Ignore Gradle project-specific cache directory
+.gradle
+
+# Ignore Gradle build output directory
+build
+
+# Ignore jdtls filespick
+.project
+.settings/
+lib/.classpath
+lib/.project
+lib/.settings/
+
+# I don't think I want these?
+lib/bin/
