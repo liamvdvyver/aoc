@@ -26,6 +26,15 @@ struct map {
   Direction direction;
 };
 
+typedef uint8_t *blockmap;
+
+struct blockmaps {
+  blockmap up;
+  blockmap down;
+  blockmap left;
+  blockmap right;
+};
+
 coord offset(Direction d) {
   switch (d) {
   case Direction::UP:
@@ -41,6 +50,7 @@ coord offset(Direction d) {
     return {1, 0};
     break;
   }
+  return {0, 0};
 }
 
 Direction next_direction(Direction d) {
@@ -54,54 +64,52 @@ Direction next_direction(Direction d) {
   case Direction::LEFT:
     return Direction::UP;
   }
+  return Direction::UP;
 }
 
 bool in_bounds(const map &map, const coord_t c) {
-  if (c.x < 0 || c.y < 0)
-    return false;
-  if (c.y >= map.obstructions.size())
-    return false;
-  if (c.x >= map.obstructions.at(0).size())
-    return false;
-  return true;
+  bool oob = (c.x < 0 || c.y < 0) || (c.y >= map.obstructions.size()) ||
+             (c.x >= map.obstructions.at(0).size());
+  return !oob;
 }
 
 // Till exist or loop
 void get_visited(map &map, dirgrid_t &visited) {
 
-  // Check oob
-  if (!in_bounds(map, map.location))
-    return;
+  while (true) {
 
-  // Check loop
-  if (visited.at(map.location.y).at(map.location.x) & (uint8_t)map.direction)
-    return;
+    // Check oob
+    if (!in_bounds(map, map.location))
+      break;
 
-  coord_t next_coord = map.location;
-  coord_t off = offset(map.direction);
+    // Check loop
+    if (visited.at(map.location.y).at(map.location.x) & (uint8_t)map.direction)
+      break;
 
-  next_coord.x += off.x;
-  next_coord.y += off.y;
+    coord_t next_coord = map.location;
+    coord_t off = offset(map.direction);
 
-  if (!in_bounds(map, next_coord) ||
-      !map.obstructions.at(next_coord.y).at(next_coord.x)) {
-    visited.at(map.location.y).at(map.location.x) =
-        (uint8_t)visited.at(map.location.y).at(map.location.x) |
-        (uint8_t)map.direction;
-    map.location = next_coord;
+    next_coord.x += off.x;
+    next_coord.y += off.y;
+
+    if (!in_bounds(map, next_coord) ||
+        !map.obstructions.at(next_coord.y).at(next_coord.x)) {
+      visited.at(map.location.y).at(map.location.x) |= (uint8_t)map.direction;
+      map.location = next_coord;
+    }
+
+    else {
+      map.direction = next_direction(map.direction);
+    }
   }
 
-  else {
-    map.direction = next_direction(map.direction);
-  }
-
-  return get_visited(map, visited);
+  return;
 }
 
-bool loops(const map &map, dirgrid_t &visited) {
-  struct map map_cpy = map;
-  get_visited(map_cpy, visited);
-  return (in_bounds(map_cpy, map_cpy.location));
+bool loops(map &map, dirgrid_t &visited) {
+  // struct map map_cpy = map;
+  get_visited(map, visited);
+  return (in_bounds(map, map.location));
 }
 
 void init_visited(const map &map, dirgrid_t &dest) {
@@ -163,10 +171,10 @@ int solve_part_two(const map &map) {
 
       if (cur) {
 
+        new_map = map;
         new_map.obstructions.at(y).at(x) = true;
         new_visited = empty_visited;
         ret += loops(new_map, new_visited);
-        new_map.obstructions.at(y).at(x) = false;
       }
 
       x++;
@@ -224,9 +232,11 @@ int main(int argc, char **argv) {
   struct map map;
   parse_stdin(map);
 
-  struct map map_1 = map;
   cout << to_string(solve_part_one(map)) << endl;
 
-  struct map map_2 = map;
-  cout << to_string(solve_part_two(map_2)) << endl;
+  cout << to_string(solve_part_two(map)) << endl;
+
+    dirgrid_t visisted = dirgrid_t();
+    init_visited(map, visisted);
+    cout << to_string(loops(map, visisted)) << endl;
 }

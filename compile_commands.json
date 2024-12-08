@@ -1,0 +1,17 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/c++",
+      "-I/home/lvdv/git/aoc/libOc",
+      "-O3",
+      "-flto",
+      "-c",
+      "-o",
+      "CMakeFiles/day_08.dir/solutions/cpp/day_08/day_08.cpp.o",
+      "/home/lvdv/git/aoc/solutions/cpp/day_08/day_08.cpp"
+    ],
+    "directory": "/home/lvdv/git/aoc",
+    "file": "/home/lvdv/git/aoc/solutions/cpp/day_08/day_08.cpp",
+    "output": "/home/lvdv/git/aoc/CMakeFiles/day_08.dir/solutions/cpp/day_08/day_08.cpp.o"
+  }
+]
