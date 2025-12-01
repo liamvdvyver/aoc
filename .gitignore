@@ -1,0 +1,10 @@
+*tests*
+Makefile
+CMakeFiles*
+CMakeFiles*
+Testing*
+cmake_install.cmake
+*.a
+CMakeCache.txt
+MakeFile.txt
+CTestTestfile.cmake
