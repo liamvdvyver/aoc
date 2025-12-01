@@ -1,20 +1,34 @@
 cmake_minimum_required(VERSION 3.10)
 project(aoc)
 
-add_compile_options(-O3 -flto -g)
+add_compile_options(-O3 -flto)
+add_link_options(-fuse-ld=lld)
 
+file(GLOB LIBOC_SRC libOc/libOc/*.cpp)
 add_library(libOc
-    libOc/grid.cpp
+    ${LIBOC_SRC}
 )
-
 include_directories(libOc libOc/)
 
-add_executable(day_02 solutions/cpp/day_02.cpp libOc/grid.h)
-add_executable(day_04 solutions/cpp/day_08.cpp libOc/grid.h)
-add_executable(day_06 solutions/cpp/day_08.cpp libOc/grid.h)
-add_executable(day_08 solutions/cpp/day_08.cpp libOc/grid.h)
+# Build solutions
+# It's ugly but it works
 
-target_link_libraries(day_02 libOc)
-target_link_libraries(day_04 libOc)
-target_link_libraries(day_06 libOc)
-target_link_libraries(day_08 libOc)
+enable_testing()
+
+set(SOLNS "solutions-25")
+
+file(GLOB SOLN_SRCS ${SOLNS}/*)
+foreach(src_dir ${SOLN_SRCS})
+    get_filename_component(day ${src_dir} NAME_WE)
+    set(src ${src_dir}/${day}.cpp)
+    add_executable(${day} ${src})
+    target_link_libraries(${name} libOc)
+    file(GLOB day_tests ${src_dir}/tests/*.in)
+    foreach(infile ${day_tests})
+        get_filename_component(test ${infile} NAME_WE)
+        add_test(
+            NAME ${test}
+            COMMAND bash -c "./${day} < ${infile} | diff -u ${src_dir}/tests/${test}.out -"
+        )
+    endforeach()
+endforeach()
