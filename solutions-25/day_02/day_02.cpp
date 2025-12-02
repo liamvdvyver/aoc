@@ -37,12 +37,15 @@ uint64_t check_range_p2(string &start, string &end) {
   // Length of numeric subsequence
   for (uint64_t len = 1; len <= end.length() / 2; len++) {
 
+    uint64_t pow_l = pow(10, len - 1);
+    uint64_t pow_h = 10 * pow_l;
+
     // Each sequence of this length
-    for (uint64_t seq = pow(10, len - 1); seq < pow(10, len); seq++) {
+    for (uint64_t seq = pow_l; seq < pow_h; seq++) {
 
       // Each possible repetition of this subsequence
-      for (uint64_t cur = seq + seq * pow(10, len); cur <= h;
-           cur = seq + (pow(10, len) * cur)) {
+      for (uint64_t cur = seq + seq * pow_h; cur <= h;
+           cur = seq + (pow_h * cur)) {
 
         if (cur >= l && !seen.count(cur)) {
           seen.insert(cur);
