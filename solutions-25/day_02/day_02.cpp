@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <iostream>
 #include <string>
+#include <unordered_set>
 
 using namespace std;
 
@@ -24,32 +25,9 @@ uint64_t check_range_p1(string &start, string &end) {
   return ret;
 }
 
-bool is_repetition(std::string seq) {
-  for (int l = 1; l <= seq.length() / 2; l++) {
-    if (seq.length() % l)
-      continue;
-    bool l_good = true;
-
-    for (int i = 0; i < l; i++) {
-
-      for (int a = 1; a < seq.length() / l; a++) {
-        if (seq[i] != seq[a * l + i]) {
-          l_good = false;
-          break;
-        }
-      }
-
-      if (!l_good)
-        break;
-    }
-
-    if (l_good)
-      return true;
-  }
-  return false;
-}
-
 uint64_t check_range_p2(string &start, string &end) {
+
+  std::unordered_set<uint64_t> seen;
 
   uint64_t l = stoull(start);
   uint64_t h = stoull(end);
@@ -61,14 +39,15 @@ uint64_t check_range_p2(string &start, string &end) {
 
     // Each sequence of this length
     for (uint64_t seq = pow(10, len - 1); seq < pow(10, len); seq++) {
-      if (is_repetition(to_string(seq)))
-        continue;
 
       // Each possible repetition of this subsequence
       for (uint64_t cur = seq + seq * pow(10, len); cur <= h;
            cur = seq + (pow(10, len) * cur)) {
-        if (cur >= l)
+
+        if (cur >= l && !seen.count(cur)) {
+          seen.insert(cur);
           ret += cur;
+        }
       }
     }
   }
