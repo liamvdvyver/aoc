@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 project(aoc)
 
-add_compile_options(-O3 -flto)
+add_compile_options(-O3 -flto -std=c++23)
 add_link_options(-fuse-ld=lld)
 
 file(GLOB LIBOC_SRC libOc/libOc/*.cpp)

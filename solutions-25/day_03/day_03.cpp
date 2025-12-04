@@ -4,11 +4,11 @@
 
 using namespace std;
 
-uint64_t max_joltage(const std::string_view bank, const size_t n) {
+uint64_t max_joltage(const string_view bank, const size_t n) {
   if (!n)
     return 0;
 
-  std::string_view sub_bank = bank.substr(0, bank.size() + 1 - n);
+  string_view sub_bank = bank.substr(0, bank.size() + 1 - n);
   size_t max_pos = 0;
   char max = 0;
 
@@ -24,7 +24,7 @@ uint64_t max_joltage(const std::string_view bank, const size_t n) {
 }
 
 int main() {
-  std::string ln;
+  string ln;
 
   uint64_t ret_1 = 0;
   uint64_t ret_2 = 0;
@@ -34,6 +34,6 @@ int main() {
     ret_2 += max_joltage(ln, 12);
   }
 
-  std::cout << ret_1 << '\n';
-  std::cout << ret_2 << '\n';
+  cout << ret_1 << '\n';
+  cout << ret_2 << '\n';
 }

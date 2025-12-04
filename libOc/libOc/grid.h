@@ -1,12 +1,39 @@
+#include <array>
 #include <iostream>
 #include <vector>
 
-using Coord = std::pair<size_t, size_t>;
-constexpr Coord operator+(Coord a, Coord b) {
-  return std::make_pair(a.first + b.first, a.second + b.second);
-}
+struct Coord : std::pair<int64_t, int64_t> {
+  Coord(int64_t x, int64_t y) : std::pair<int64_t, int64_t>(x, y) {}
+  Coord() : Coord(0, 0) {};
+  constexpr Coord operator+(Coord b) {
+    return Coord(this->first + b.first, this->second + b.second);
+  }
+  constexpr std::array<Coord, 4> cardinal_neighbours();
+  constexpr std::array<Coord, 8> ordinal_neighbours();
+};
 
-using C = Coord;
+static const std::array<Coord, 4> cardinal_offsets = {
+    Coord(1, 0), Coord(-1, 0), Coord(0, 1), Coord(0, -1)};
+static const std::array<Coord, 4> intercardinal_offsets = {
+    Coord(1, 1), Coord(-1, 1), Coord(1, -1), Coord(-1, -1)};
+static const std::array<Coord, 8> ordinal_offsets = {
+    Coord(1, 0), Coord(-1, 0), Coord(0, 1),  Coord(0, -1),
+    Coord(1, 1), Coord(-1, 1), Coord(1, -1), Coord(-1, -1)};
+
+constexpr std::array<Coord, 4> Coord::cardinal_neighbours() {
+  std::array<Coord, 4> ret;
+  for (int i = 0; i < 4; i++) {
+    ret[i] = *this + cardinal_offsets[i];
+  }
+  return ret;
+};
+constexpr std::array<Coord, 8> Coord::ordinal_neighbours() {
+  std::array<Coord, 8> ret;
+  for (int i = 0; i < 8; i++) {
+    ret[i] = *this + ordinal_offsets[i];
+  }
+  return ret;
+};
 
 template <typename T> struct Grid {
 
@@ -30,8 +57,8 @@ template <typename T> struct Grid {
 
   Coord bound() {
     if (v.size() == 0)
-      return std::make_pair(0, 0);
-    return std::make_pair(v[0].size(), v.size());
+      return {};
+    return Coord(v.size(), v[0].size());
   }
 
   // Accessors
@@ -71,5 +98,16 @@ template <typename T> struct Grid {
       }
     }
     return is;
+  }
+
+  std::vector<Coord> coords() {
+    std::vector<Coord> ret;
+    ret.reserve(bound().first * bound().second);
+    for (int i = 0; i < bound().first; i++) {
+      for (int j = 0; j < bound().second; j++) {
+        ret.push_back(Coord(i, j));
+      }
+    }
+    return ret;
   }
 };
