@@ -15,46 +15,29 @@ int main(void) {
   sort(ingredients.begin(), ingredients.end());
 
   // Merge ranges
-  assert(ranges.size() >= 2);
-  {
-    int i = 0;
-    for (int j = 1; j < ranges.size(); j++) {
-
-      // Non-overlapping
-      if (ranges[i][1] < ranges[j][0]) {
-        ranges[++i] = ranges[j];
-        continue;
-      }
-
-      // Partial overlap
-      if (ranges[i][1] < ranges[j][1]) {
-        ranges[i][1] = ranges[j][1];
-        continue;
-      }
-
-      // Full overlap
-      if (ranges[i][1] >= ranges[j][1]) {
-        continue;
-      }
+  size_t i = 0;
+  for (size_t j = 1; j < ranges.size(); j++) {
+    // Non-overlapping
+    if (ranges[i][1] < ranges[j][0]) {
+      ranges[++i] = ranges[j];
     }
-    ranges.resize(i + 1);
+
+    // Partial overlap
+    else if (ranges[i][1] < ranges[j][1]) {
+      ranges[i][1] = ranges[j][1];
+    }
   }
+  ranges.resize(i + 1);
 
   uint64_t ret_1 = 0;
-  {
-    int r = 0;
-    int i = 0;
-    for (; r < ranges.size() && i < ingredients.size();) {
-      if (ranges[r][0] <= ingredients[i] && ingredients[i] <= ranges[r][1]) {
-        ret_1++;
-        i++;
-      } else if (ingredients[i] < ranges[r][0]) {
-        i++;
-        continue;
-      } else if (ingredients[i] >= ranges[r][1]) {
-        r++;
-        continue;
-      }
+  for (size_t i = 0, r = 0; r < ranges.size() && i < ingredients.size();) {
+    if (ranges[r][0] <= ingredients[i] && ingredients[i] <= ranges[r][1]) {
+      ret_1++;
+      i++;
+    } else if (ingredients[i] < ranges[r][0]) {
+      i++;
+    } else if (ingredients[i] >= ranges[r][1]) {
+      r++;
     }
   }
 
