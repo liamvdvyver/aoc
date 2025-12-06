@@ -94,7 +94,8 @@ template <typename T> struct Grid {
         g.v.emplace_back();
       } else {
         g.v.back().emplace_back();
-        is >> g.v.back().back();
+        g.v.back().back() = is.get();
+        // is >> g.v.back().back();
       }
     }
     return is;
