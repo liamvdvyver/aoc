@@ -1,55 +1,36 @@
-#include <cassert>
+#include <chrono>
 #include <iostream>
-#include <string>
 #include <vector>
-
-#include <libOc/grid.h>
 
 using namespace std;
 
 int main(void) {
-  vector<bool> beams;
+  const auto start_time = chrono::steady_clock::now();
 
   string ln;
   getline(cin, ln);
+  const size_t n = ln.length();
 
-  for (char c : ln) {
-    beams.push_back(c == 'S');
-  }
-  size_t n = beams.size();
+  vector<uint64_t> ways(n, 0);
+  ways[ln.find('S')] = 1;
 
-  vector<size_t> n_ways(n, 0);
-
-  for (int i = 0; i < n; i++) {
-    n_ways[i] = beams[i];
-  }
-
-  vector<bool> splitters(n);
   size_t ret_1 = 0;
-
-  while (!cin.eof()) {
+  while (getline(cin, ln)) {
     for (int i = 0; i < n; i++) {
-      bool splitter = cin.get() == '^';
-
-      if (n_ways[i] && splitter) {
-
-        // Part one
+      if (ways[i] && ln[i] == '^') {
         ret_1++;
-
-        // Part two
-        n_ways[i - 1] += n_ways[i];
-        n_ways[i + 1] += n_ways[i];
-        n_ways[i] = 0;
+        ways[i - 1] += ways[i];
+        ways[i + 1] += ways[i];
+        ways[i] = 0;
       }
     }
-    cin.ignore();
   }
-
   size_t ret_2 = 0;
-  for (auto n : n_ways) {
+  for (auto n : ways)
     ret_2 += n;
-  }
 
-  cout << ret_1 << '\n';
-  cout << ret_2 << '\n';
+  cout << ret_1 << '\n' << ret_2 << '\n';
+
+  auto end_time = chrono::steady_clock::now();
+  cerr << chrono::duration<double, milli>(end_time - start_time) << '\n';
 }

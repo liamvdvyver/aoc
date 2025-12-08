@@ -17,49 +17,77 @@ constexpr std::vector<std::string_view> split(std::string_view str,
 template <typename T = uint64_t, bool Delimited = true>
 std::vector<std::vector<T>> parse_delim(std::istream &is) {
   std::vector<std::vector<T>> ret;
-  ret.emplace_back();
-  while (true) {
-    if (is.eof()) {
-      break;
-    }
-    if (is.peek() == '\n' && ret.empty()) {
+  while (!is.eof()) {
+    if (is.peek() == '\n') {
       is.ignore();
-      break;
-    }
-    if (is.peek() == '\n' && (ret.back().empty() || is.eof())) {
-      is.ignore();
-      ret.pop_back();
       break;
     }
 
-    if (is.peek() == '\n') {
-      is.ignore();
-      ret.emplace_back();
-    } else {
+    ret.emplace_back();
+    while (!is.eof()) {
       ret.back().emplace_back();
       is >> ret.back().back();
-      if (Delimited && is.peek() != '\n') {
-        is.ignore(); // chuck away delimiter
-      }
+      if (is.get() == '\n') // \n or delim
+        break;
     }
+  }
+  return ret;
+}
+
+template <typename T = uint64_t>
+std::vector<std::pair<T, T>> parse_pairs(std::istream &is) {
+  std::vector<std::pair<T, T>> ret;
+  while (!is.eof()) {
+    if (is.peek() == '\n') {
+      is.ignore();
+      break;
+    }
+
+    T a, b;
+    is >> a;
+    is.ignore(); // delim
+    is >> b;
+    ret.emplace_back(a, b);
+
+    assert(is.peek() == '\n' || is.eof());
+    is.ignore(); // \n
   }
   return ret;
 }
 
 template <typename T = uint64_t> std::vector<T> lines(std::istream &is) {
   std::vector<T> ret;
-  while (true) {
-    if (is.peek() == '\n' || is.eof()) {
+  while (!is.eof()) {
+    if (is.peek() == '\n') {
       is.ignore();
       break;
     }
 
     ret.emplace_back();
     is >> ret.back();
-    if (is.eof()) {
+
+    assert(is.peek() == '\n' || is.eof());
+    is.ignore(); // \n
+  }
+  return ret;
+}
+
+template <> std::vector<std::string> lines<std::string>(std::istream &is) {
+  std::vector<std::string> ret;
+  for (std::string ln; getline(is, ln);) {
+    if (ln.empty())
       break;
-    }
-    assert(is.get() == '\n');
+    ret.push_back(ln);
+  }
+  return ret;
+}
+
+template <> std::vector<uint64_t> lines<uint64_t>(std::istream &is) {
+  std::vector<uint64_t> ret;
+  for (std::string ln; getline(is, ln);) {
+    if (ln.empty())
+      break;
+    ret.push_back(std::stoul(ln));
   }
   return ret;
 }

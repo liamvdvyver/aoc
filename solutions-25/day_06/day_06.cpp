@@ -1,6 +1,6 @@
 #include <cassert>
+#include <chrono>
 #include <iostream>
-#include <sstream>
 #include <string>
 #include <vector>
 
@@ -63,35 +63,42 @@ uint64_t solve_p2(Grid<char> &g) {
 
 int main(void) {
 
+  auto start_time = chrono::steady_clock::now();
+
   // Grid/nums for parts 2/1
-  vector<vector<uint64_t>> nums;
   Grid<char> g;
+  cin >> g;
+
   vector<char> ops;
-
-  for (std::string l; getline(cin, l);) {
-
-    // Grid
-    g.v.emplace_back();
-    for (auto c : l) {
-      g.v.back().emplace_back(c);
+  ops.reserve(g.bound().second);
+  for (char c : g.v.back()) {
+    if (c == '*' || c == '+') {
+      ops.push_back(c);
     }
+  }
 
-    // Parse ops
-    if (l.find('*') != l.npos) {
-      for (auto c : l) {
-        if (c == '*' || c == '+') {
-          ops.push_back(c);
+  vector<vector<uint64_t>> nums;
+  for (vector<char> &u : g.v) {
+
+    // Skip operator line
+    if (&u == &g.v.back())
+      break;
+
+    nums.emplace_back();
+    std::string ln;
+    ln.reserve(u.size());
+    for (char c : u)
+      if (c == ' ') {
+        if (!ln.empty()) {
+          nums.back().push_back(stoul(ln));
         }
+        ln.clear();
+      } else {
+        ln.push_back(c);
       }
 
-      // Parse nums
-    } else {
-      nums.emplace_back();
-      stringstream ss{l};
-      uint64_t n;
-      while (ss >> n) {
-        nums.back().push_back(n);
-      }
+    if (!ln.empty()) {
+      nums.back().push_back(stoul(ln));
     }
   }
 
@@ -111,4 +118,7 @@ int main(void) {
   }
 
   cout << solve_p2(g) << '\n';
+
+  auto end_time = chrono::steady_clock::now();
+  cerr << chrono::duration<double, milli>(end_time - start_time) << '\n';
 }

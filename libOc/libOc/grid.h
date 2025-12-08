@@ -1,15 +1,24 @@
 #include <array>
+#include <functional>
 #include <iostream>
+#include <queue>
 #include <vector>
 
 struct Coord : std::pair<int64_t, int64_t> {
-  Coord(int64_t x, int64_t y) : std::pair<int64_t, int64_t>(x, y) {}
-  Coord() : Coord(0, 0) {};
+  constexpr Coord(int64_t x, int64_t y) : std::pair<int64_t, int64_t>(x, y) {}
+  constexpr Coord() : Coord(0, 0) {};
   constexpr Coord operator+(Coord b) {
     return Coord(this->first + b.first, this->second + b.second);
   }
   constexpr std::array<Coord, 4> cardinal_neighbours();
   constexpr std::array<Coord, 8> ordinal_neighbours();
+
+  struct hash {
+    size_t operator()(const Coord c) const {
+      return (17 * (size_t)std::hash<int64_t>()(c.first)) ^
+             std::hash<int64_t>()(c.second);
+    }
+  };
 };
 
 static const std::array<Coord, 4> cardinal_offsets = {
@@ -60,10 +69,15 @@ template <typename T> struct Grid {
       return {};
     return Coord(v.size(), v[0].size());
   }
+  bool in_bounds(Coord c) {
+    return c.first >= 0 && c.second >= 0 && c.first < bound().first &&
+           c.second < bound().second;
+  }
 
   // Accessors
 
-  T &operator[](const Coord c) { return v[c.first][c.second]; }
+  // T &operator[](const Coord c) { return v[c.first][c.second]; }
+  auto operator[](const Coord c) { return v[c.first][c.second]; }
 
   const T &operator[](const Coord c) const { return v.at(c.first)(c.second); }
 
@@ -79,23 +93,15 @@ template <typename T> struct Grid {
   }
 
   // Read until double newline or eof
-  friend std::istream &operator>>(std::istream &is, Grid<char> &g) {
-    g.v.emplace_back();
-    while (true) {
-      if (is.peek() == '\n' && g.v.empty())
-        break;
-      if (is.peek() == '\n' && g.v.back().empty() || is.eof()) {
-        g.v.pop_back();
-        break;
-      }
+  friend std::istream &operator>>(std::istream &is, Grid &g) {
+    for (std::string ln; getline(is, ln);) {
+      if (!ln.length())
+        return is;
 
-      if (is.peek() == '\n') {
-        is.ignore();
-        g.v.emplace_back();
-      } else {
-        g.v.back().emplace_back();
-        g.v.back().back() = is.get();
-        // is >> g.v.back().back();
+      g.v.emplace_back();
+      g.v.back().reserve(ln.length());
+      for (char c : ln) {
+        g.v.back().push_back(c);
       }
     }
     return is;
@@ -111,4 +117,29 @@ template <typename T> struct Grid {
     }
     return ret;
   }
+
+  std::queue<Coord> coords_q() {
+    std::queue<Coord> ret;
+    for (int i = 0; i < bound().first; i++) {
+      for (int j = 0; j < bound().second; j++) {
+        ret.push(Coord(i, j));
+      }
+    }
+    return ret;
+  }
 };
+
+static constexpr Grid<bool> match_grid(std::istream &is, const char match) {
+  Grid<bool> g;
+  for (std::string ln; getline(is, ln);) {
+    if (!ln.length())
+      return g;
+
+    g.v.emplace_back();
+    g.v.back().reserve(ln.length());
+    for (char c : ln) {
+      g.v.back().push_back(c == match);
+    }
+  }
+  return g;
+}
