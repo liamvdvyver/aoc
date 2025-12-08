@@ -30,6 +30,11 @@ std::vector<std::vector<T>> parse_delim(std::istream &is) {
       if (is.get() == '\n') // \n or delim
         break;
     }
+    // TODO: why isn't this caught as a \n
+    if (ret.back().empty()) {
+      ret.pop_back();
+      break;
+    }
   }
   return ret;
 }
