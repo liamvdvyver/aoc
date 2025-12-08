@@ -1,10 +1,11 @@
+#include <chrono>
 #include <cmath>
 #include <iostream>
 #include <string>
 
 using namespace std;
 
-uint64_t max_joltage(const string_view bank, const size_t n) {
+constexpr uint64_t max_joltage(const string_view bank, const size_t n) {
   if (!n)
     return 0;
 
@@ -24,16 +25,21 @@ uint64_t max_joltage(const string_view bank, const size_t n) {
 }
 
 int main() {
+  auto start_time = chrono::steady_clock::now();
+
   string ln;
 
   uint64_t ret_1 = 0;
   uint64_t ret_2 = 0;
 
-  while (std::cin >> ln) {
+  for (string ln; getline(cin, ln);) {
     ret_1 += max_joltage(ln, 2);
     ret_2 += max_joltage(ln, 12);
   }
 
   cout << ret_1 << '\n';
   cout << ret_2 << '\n';
+
+  auto end_time = chrono::steady_clock::now();
+  cerr << chrono::duration<double, milli>(end_time - start_time) << '\n';
 }
