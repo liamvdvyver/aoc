@@ -1,5 +1,6 @@
 #include <chrono>
 #include <iostream>
+#include <queue>
 #include <vector>
 
 #include <libOc/parsing.h>
@@ -23,27 +24,29 @@ constexpr size_t find(size_t i, vector<size_t> &parents) {
   return parent;
 }
 
-constexpr pair<size_t, size_t> solve(vector<vector<size_t>> &coord) {
+struct CompPairs {
+  static bool operator()(pair<size_t, pair<size_t, size_t>> &a,
+                         pair<size_t, pair<size_t, size_t>> &b) {
+    return a.first > b.first;
+  }
+};
+
+pair<size_t, size_t> solve(vector<vector<size_t>> &coord) {
 
   pair<size_t, size_t> ret{};
 
-  // Part one
+  using Entry = pair<size_t, pair<size_t, size_t>>;
 
-  vector<pair<size_t, size_t>> pairs;
+  priority_queue<Entry, vector<Entry>, CompPairs> pairs;
+
   vector<size_t> parents(coord.size());
 
   for (int i = 0; i < coord.size(); i++) {
     parents[i] = i;
     for (int j = i + 1; j < coord.size(); j++) {
-      pairs.emplace_back(i, j);
+      pairs.push({dist(coord[i], coord[j]), {i, j}});
     }
   }
-
-  sort(pairs.begin(), pairs.end(),
-       [&](const pair<size_t, size_t> &a, const pair<size_t, size_t> &b) {
-         return dist(coord[a.first], coord[a.second]) >
-                dist(coord[b.first], coord[b.second]);
-       });
 
   // Example sizes are not part of input for this one
   const size_t n_pairs = coord.size() > 20 ? 1000 : 10;
@@ -51,18 +54,16 @@ constexpr pair<size_t, size_t> solve(vector<vector<size_t>> &coord) {
   vector<size_t> group_sizes(coord.size(), 1);
 
   // Perform merges
-  for (int pair_i = 1, merged = 0;; pair_i++) {
+  for (int it = 1, merged = 0;; it++) {
 
     bool part_one_done = false;
 
-    if (pairs.empty())
-      break;
-
     // Get pair
-    auto [a, b] = pairs.back();
-    pairs.pop_back();
+    auto [c, p] = pairs.top();
+    auto [a, b] = p;
+    pairs.pop();
 
-    size_t rep_a = find(a, parents), rep_b = find(b, parents);
+    auto rep_a = find(a, parents), rep_b = find(b, parents);
     if (rep_a == rep_b)
       continue;
 
@@ -78,7 +79,7 @@ constexpr pair<size_t, size_t> solve(vector<vector<size_t>> &coord) {
     merged++;
 
     // Part one answer
-    if (!part_one_done && pair_i == n_pairs) {
+    if (!part_one_done && it == n_pairs) {
 
       sort(group_sizes.begin(), group_sizes.end(),
            [](size_t a, size_t b) { return a > b; });

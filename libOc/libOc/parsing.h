@@ -48,11 +48,14 @@ std::vector<std::pair<T, T>> parse_pairs(std::istream &is) {
       break;
     }
 
-    T a, b;
-    is >> a;
-    is.ignore(); // delim
-    is >> b;
-    ret.emplace_back(a, b);
+        // TODO: wtf
+    if (!is.eof()) {
+      T a, b;
+      is >> a;
+      is.ignore(); // delim
+      is >> b;
+      ret.emplace_back(a, b);
+    }
 
     assert(is.peek() == '\n' || is.eof());
     is.ignore(); // \n
