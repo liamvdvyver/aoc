@@ -1,3 +1,4 @@
+#include <chrono>
 #include <iostream>
 #include <sstream>
 #include <unordered_map>
@@ -57,6 +58,8 @@ size_t solve_p2(adj_t &adj) {
 };
 
 int main(void) {
+  const auto start_time = chrono::steady_clock::now();
+
   adj_t adj;
 
   for (string ln; getline(cin, ln);) {
@@ -76,4 +79,7 @@ int main(void) {
 
   cout << solve_p1(adj) << endl;
   cout << solve_p2(adj) << endl;
+
+  auto end_time = chrono::steady_clock::now();
+  cerr << chrono::duration<double, milli>(end_time - start_time) << '\n';
 }

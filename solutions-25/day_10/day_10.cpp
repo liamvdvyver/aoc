@@ -1,3 +1,4 @@
+#include <chrono>
 #include <iostream>
 #include <vector>
 
@@ -120,6 +121,8 @@ size_t solve_p2(vector<Machine> &ms) {
 }
 
 int main(void) {
+  const auto start_time = chrono::steady_clock::now();
+
   vector<Machine> input;
   while (!cin.eof()) {
 
@@ -177,4 +180,7 @@ int main(void) {
 
   cout << solve_p1(input) << endl;
   cout << solve_p2(input) << endl;
+
+  auto end_time = chrono::steady_clock::now();
+  cerr << chrono::duration<double, milli>(end_time - start_time) << '\n';
 }
