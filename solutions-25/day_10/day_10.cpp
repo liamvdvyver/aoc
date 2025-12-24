@@ -49,7 +49,8 @@ size_t solve_p1(vector<Machine> &ms) {
 size_t solve_p2(Machine &m) {
 
   z3::context c;
-  z3::solver s(c);
+  // z3::solver s(c);
+  z3::optimize s(c);
 
   z3::expr zero = c.int_const("zero");
   s.add(zero == 0);
@@ -98,17 +99,9 @@ size_t solve_p2(Machine &m) {
     }
   }
 
-  // Add constraints: final sum
-  for (int d = 0; d < 999; d++) {
-    s.push();
-    z3::expr d_lim = partial_costs.back() == d;
-    s.add(d_lim);
-    if (s.check() == z3::sat) {
-      return d;
-    }
-    s.pop();
-  }
-  return 0;
+  s.minimize(partial_costs.back());
+  s.check();
+  return s.get_model().eval(partial_costs.back()).get_numeral_uint64();
 }
 
 size_t solve_p2(vector<Machine> &ms) {

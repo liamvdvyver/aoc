@@ -15,10 +15,6 @@ int main(void) {
   vector<pair<int64_t, int64_t>> tiles = parse_pairs<int64_t>(cin);
   // vector<Coord> tiles;
 
-  // tiles.reserve(tiles_.size());
-  // for (auto [i, j] : tiles_) {
-  //   tiles.emplace_back(i, j);
-  // }
   const size_t n = tiles.size();
 
   // Part one

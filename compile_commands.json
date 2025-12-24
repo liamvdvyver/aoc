@@ -1,17 +1,18 @@
 [
   {
     "arguments": [
-      "/usr/bin/c++",
+      "/usr/bin/clang++",
       "-I/home/lvdv/git/aoc/libOc",
       "-O3",
       "-flto",
+      "-std=c++23",
       "-c",
       "-o",
-      "CMakeFiles/day_08.dir/solutions/cpp/day_08/day_08.cpp.o",
-      "/home/lvdv/git/aoc/solutions/cpp/day_08/day_08.cpp"
+      "CMakeFiles/day_03.dir/solutions-25/day_03/day_03.cpp.o",
+      "/home/lvdv/git/aoc/solutions-25/day_03/day_03.cpp"
     ],
     "directory": "/home/lvdv/git/aoc",
-    "file": "/home/lvdv/git/aoc/solutions/cpp/day_08/day_08.cpp",
-    "output": "/home/lvdv/git/aoc/CMakeFiles/day_08.dir/solutions/cpp/day_08/day_08.cpp.o"
+    "file": "/home/lvdv/git/aoc/solutions-25/day_03/day_03.cpp",
+    "output": "/home/lvdv/git/aoc/CMakeFiles/day_03.dir/solutions-25/day_03/day_03.cpp.o"
   }
 ]
